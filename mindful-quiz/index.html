@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#dce8ef" />
+  <title>明知故問｜心境探索</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="quiz" id="quiz" aria-label="Initial 心境問卷">
+    <!-- 背景圖片：由 JavaScript 隨選項更新 -->
+    <div class="background background--base" id="backgroundBase" aria-hidden="true"></div>
+    <div class="background background--overlay" id="backgroundOverlay" aria-hidden="true"></div>
+    <div class="background-tint" aria-hidden="true"></div>
+
+    <section class="quiz-content" id="quizContent">
+        <div class="progress" aria-label="測驗進度">
+          <span id="progressText">1 / 5</span>
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+      <header class="question-header">
+        <div class="question-badge" id="questionBadge">Q1</div>
+        <h1 id="questionTitle">最近的你，心情像哪一座森林？</h1>
+        <p class="question-hint">點選一個景象，看看它是否貼近你的感受。</p>
+      </header>
+
+      <div class="visual-space" aria-hidden="true"></div>
+
+      <section class="options" id="options" aria-label="請選擇一個選項"></section>
+
+      <footer class="quiz-footer">
+        <div class="navigation">
+          <button class="back-button" id="backButton" type="button">上一題</button>
+          <button class="next-button" id="nextButton" type="button" disabled>下一題 <span aria-hidden="true">❯</span></button>
+        </div>
+      </footer>
+    </section>
+
+    <section class="result" id="result" hidden>
+      <div class="result-panel">
+        <p class="result-eyebrow">INITIAL · COMPLETE</p>
+        <h2>謝謝你，完成了心境探索</h2>
+        <p>這是目前記錄的五題答案。正式推薦結果頁可以接在這裡。</p>
+        <div id="answerSummary" class="answer-summary"></div>
+        <button class="next-button" id="restartButton" type="button">重新測驗</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
