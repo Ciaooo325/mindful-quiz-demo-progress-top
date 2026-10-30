@@ -8,18 +8,6 @@ const questions = [
     options: ["窒息濃霧", "狂亂強風", "悶熱陰天", "灑落陽光"]
   },
   {
-    title: "這幾天，你覺得你的睡眠更像哪種狀態的海面？",
-    folder: "ocean",
-    backgroundFolder: "ocean",
-    options: ["沉入黑暗深海", "搖晃不安的浪", "靜止平淡的潮", "明亮平穩的波"]
-  },
-  {
-    title: " 感受一下，你的身體現在背負著什麼樣的山岩？",
-    folder: "mountain",
-    backgroundFolder: "mountain",
-    options: ["崩塌的巨石", "銳利的碎石", "沉重的土堆", "輕盈的雲煙"]
-  },
-  {
     title: " 最近的生活節奏，讓你覺得眼前的稻浪是？",
     folder: "field",
     backgroundFolder: "field",
@@ -69,28 +57,51 @@ function imageExists(src) {
     img.src = src;
   });
 }
-async function changeBackground(src) {
+const BACKGROUND_FADE_MS = 650;
+
+async function changeBackground(src, fadeDuration = BACKGROUND_FADE_MS) {
   const version = ++backgroundVersion;
   const exists = await imageExists(src);
+
   if (version !== backgroundVersion) return;
+
   const base = $("backgroundBase");
   const overlay = $("backgroundOverlay");
-  if (!exists) {
-    overlay.classList.remove("is-visible");
-    base.style.backgroundImage = "";
-    return;
+
+  const layer = document.createElement("div");
+  layer.className = "background-layer";
+
+  // 設定此次動畫時間
+  layer.style.setProperty(
+    "--fade-duration",
+    `${fadeDuration}ms`
+  );
+
+  if (exists) {
+    layer.style.backgroundImage = `url("${src}")`;
+  } else {
+    layer.style.backgroundImage =
+      "linear-gradient(#dce9f7 0%, #eff3f5 47%, #f8e8e2 100%)";
   }
-  overlay.style.backgroundImage = `url("${src}")`;
-  overlay.classList.add("is-visible");
-  // 動畫完成後將新圖設為底圖，讓下一次切換繼續淡入。
+
+  overlay.appendChild(layer);
+
+  void layer.offsetWidth;
+  layer.classList.add("is-visible");
+
   setTimeout(() => {
     if (version !== backgroundVersion) return;
-    base.style.backgroundImage = `url("${src}")`;
-    overlay.classList.remove("is-visible");
-  }, 680);
+
+    base.style.backgroundImage = layer.style.backgroundImage;
+    overlay.replaceChildren();
+
+  }, fadeDuration);
 }
 function renderQuestion() {
-  const q = questions[currentQuestion];
+      const q = questions[currentQuestion];
+
+  // 提前載入當前題目的背景圖片
+  preloadQuestionBackgrounds(currentQuestion);
   $("questionBadge").textContent = `Q${currentQuestion + 1}`;
   $("questionTitle").textContent = q.title;
   $("progressText").textContent = `${currentQuestion + 1} / ${questions.length}`;
@@ -131,15 +142,17 @@ console.log("選項圖片路徑：", src);
     });
     optionsEl.appendChild(button);
   });
-  if (answers[currentQuestion] !== null) {
-  changeBackground(
-    backgroundPath(currentQuestion, answers[currentQuestion])
-  );
-} else {
-  changeBackground(
-    defaultBackgroundPath(currentQuestion)
-  );
-}
+    if (answers[currentQuestion] !== null) {
+    changeBackground(
+        backgroundPath(currentQuestion, answers[currentQuestion]),
+        350
+    );
+    } else {
+    changeBackground(
+        defaultBackgroundPath(currentQuestion),
+        350
+    );
+    }
 }
 function showResult() {
   $("quizContent").hidden = true;
@@ -166,3 +179,15 @@ $("restartButton").addEventListener("click", () => {
   renderQuestion();
 });
 renderQuestion();
+
+function preloadQuestionBackgrounds(questionIndex) {
+  // 預載預設背景
+  const defaultImg = new Image();
+  defaultImg.src = defaultBackgroundPath(questionIndex);
+
+  // 預載 A、B、C、D 四張背景
+  for (let i = 0; i < 4; i++) {
+    const img = new Image();
+    img.src = backgroundPath(questionIndex, i);
+  }
+}
