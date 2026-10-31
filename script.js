@@ -154,17 +154,88 @@ console.log("選項圖片路徑：", src);
     );
     }
 }
+
+
 function showResult() {
+
+  // 1. 確認三題皆已作答
+  if (answers.some(answer => answer === null)) {
+    return;
+  }
+
+  // 2. 計算 Baseline 推薦結果
+  const result = calculateBaselineRecommendation(answers);
+
+  const {
+    baselineProfile,
+    recommendation,
+    scores,
+    isDefault
+  } = result;
+
+  // 3. 切換到結果頁面
   $("quizContent").hidden = true;
   $("result").hidden = false;
-  $("answerSummary").innerHTML = answers.map((a, i) =>
-    `<div class="answer-row"><span>Q${i + 1} · ${questions[i].folder}</span><strong>${letters[a]}（${3 - a} 分）</strong></div>`
-  ).join("");
-  console.log("Initial 問卷結果：", {
-    answers: answers.map(i => letters[i]),
-    scores: answers.map(i => 3 - i)
-  });
+
+  // 4. 三題對應的 Baseline 維度
+  const dimensionNames = [
+    "壓力／焦慮",
+    "低能量",
+    "思緒負荷"
+  ];
+
+  // 5. 顯示三題答案
+  const answerHTML = answers.map((answer, index) => `
+    <div class="answer-row">
+      <span>Q${index + 1} · ${dimensionNames[index]}</span>
+      <strong>
+        ${letters[answer]}（${3 - answer} 分）
+      </strong>
+    </div>
+  `).join("");
+
+  // 6. 顯示推薦結果
+  const recommendationHTML = `
+    <h3>你的個人化推薦結果</h3>
+
+    <div class="answer-row">
+      <span>冥想場景 SCENE</span>
+      <strong>
+        ${BASELINE_LABELS.scene[recommendation.scene]}
+      </strong>
+    </div>
+
+    <div class="answer-row">
+      <span>呼吸方式 BREATHING</span>
+      <strong>
+        ${BASELINE_LABELS.breathing[recommendation.breathing]}
+      </strong>
+    </div>
+
+    ${isDefault
+      ? "<p>目前三個維度皆為零，採用預設推薦。</p>"
+      : ""}
+  `;
+
+  // 7. 將結果顯示在網頁
+  $("answerSummary").innerHTML =
+    answerHTML + recommendationHTML;
+
+  // 8. 整理推薦結果 JSON
+  const resultData = {
+    baselineProfile,
+    current_recommendation: recommendation
+  };
+
+  // 9. Console 輸出
+  console.log("問卷答案：", answers);
+  console.log("Baseline Profile：", baselineProfile);
+  console.log("推薦結果：", recommendation);
+  console.log("完整 JSON：", resultData);
+  console.log("候選項目分數：", scores);
 }
+
+
 $("nextButton").addEventListener("click", () => {
   if (answers[currentQuestion] === null) return;
   if (currentQuestion === questions.length - 1) showResult();
@@ -190,4 +261,37 @@ function preloadQuestionBackgrounds(questionIndex) {
     const img = new Image();
     img.src = backgroundPath(questionIndex, i);
   }
+}
+
+
+function recommendSceneBalanced(answers) {
+  // answers: [Q1, Q2, Q3]
+  // A=0, B=1, C=2, D=3
+
+  const [stress, lowEnergy, cognitiveLoad] = answers;
+
+  if (answers.some(a => a === null || a === undefined)) {
+    throw new Error("請先完成三題問卷");
+  }
+
+  // Q3：思緒負荷較高
+  if (cognitiveLoad <= 1) {
+
+    // Q1：壓力較高 → 海邊
+    if (stress <= 1) {
+      return "seaside";
+    }
+
+    // Q1：壓力較低 → 山群
+    return "mountain";
+  }
+
+  // Q3：思緒負荷較低
+  // Q2：低能量較高 → 稻田
+  if (lowEnergy <= 1) {
+    return "rice_field";
+  }
+
+  // Q2：低能量較低 → 森林
+  return "forest";
 }

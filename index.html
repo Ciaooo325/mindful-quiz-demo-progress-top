@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#dce8ef" />
   <title>冥知故問｜心境探索</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="baseline-recommendation.js" defer></script>
   <script src="script.js" defer></script>
 </head>
 <body>
@@ -32,8 +33,8 @@
 
       <footer class="quiz-footer">
         <div class="navigation">
-          <button class="back-button" id="backButton" type="button">上一題</button>
-          <button class="next-button" id="nextButton" type="button" disabled>下一題 <span aria-hidden="true">❯</span></button>
+          <button class="back-button" id="backButton" type="button"><span aria-hidden="true">❮</span> 上一題 </button>
+          <button class="next-button" id="nextButton" type="button" disabled> 下一題 <span aria-hidden="true">❯</span></button>
         </div>
       </footer>
     </section>
@@ -42,7 +43,10 @@
       <div class="result-panel">
         <p class="result-eyebrow">INITIAL · COMPLETE</p>
         <h2>謝謝你，完成了心境探索</h2>
-        <p>這是目前記錄的三題答案。正式推薦結果頁可以接在這裡。</p>
+        <p>
+        根據你的心境探索結果，
+        為你推薦適合的冥想場景、呼吸方式與引導技巧。
+        </p>
         <div id="answerSummary" class="answer-summary"></div>
         <button class="next-button" id="restartButton" type="button">重新測驗</button>
       </div>

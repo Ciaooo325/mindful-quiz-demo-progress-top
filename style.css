@@ -45,7 +45,7 @@ button { font: inherit; cursor: pointer; }
 
   width: 75px;
   height: 70px;
-  margin: 0 auto 20px;
+  margin: 0 auto 0px;
 
   background-image: url("assets/ui/question-shell.png");
   background-size: contain;
@@ -121,7 +121,7 @@ h1 { max-width: 380px; margin: 0 auto; font-size: clamp(25px, 6.2vw, 35px); line
 .next-button { color: #5b6170; background: #fff6f5ed; }
 .next-button span { margin-left: 7px; }
 .next-button:disabled { opacity: .52; cursor: not-allowed; }
-.back-button { color: #69788d; background: #ffffffa8; font-size: 13px; }
+.back-button { color: #69788d; background: #ffffffa8;  }
 .back-button:disabled { opacity: 0; pointer-events: none; }
 .result { position: relative; z-index: 2; min-height: 100svh; display: grid; place-items: center; padding: 28px; }
 .result[hidden], .quiz-content[hidden] { display: none; }
@@ -148,7 +148,7 @@ h1 { max-width: 380px; margin: 0 auto; font-size: clamp(25px, 6.2vw, 35px); line
   }
 
   .next-button {
-    margin-right:auto;
+
   }
 
   /* ===== 選項圖片大小調整 ===== */
