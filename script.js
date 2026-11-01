@@ -8,18 +8,6 @@ const questions = [
     options: ["窒息濃霧", "狂亂強風", "悶熱陰天", "灑落陽光"]
   },
   {
-    title: "這幾天，你覺得你的睡眠更像哪種狀態的海面？",
-    folder: "ocean",
-    backgroundFolder: "ocean",
-    options: ["沉入黑暗深海", "搖晃不安的浪", "靜止平淡的潮", "明亮平穩的波"]
-  },
-  {
-    title: " 感受一下，你的身體現在背負著什麼樣的山岩？",
-    folder: "mountain",
-    backgroundFolder: "mountain",
-    options: ["崩塌的巨石", "銳利的碎石", "沉重的土堆", "輕盈的雲煙"]
-  },
-  {
     title: " 最近的生活節奏，讓你覺得眼前的稻浪是？",
     folder: "field",
     backgroundFolder: "field",
@@ -69,28 +57,51 @@ function imageExists(src) {
     img.src = src;
   });
 }
-async function changeBackground(src) {
+const BACKGROUND_FADE_MS = 650;
+
+async function changeBackground(src, fadeDuration = BACKGROUND_FADE_MS) {
   const version = ++backgroundVersion;
   const exists = await imageExists(src);
+
   if (version !== backgroundVersion) return;
+
   const base = $("backgroundBase");
   const overlay = $("backgroundOverlay");
-  if (!exists) {
-    overlay.classList.remove("is-visible");
-    base.style.backgroundImage = "";
-    return;
+
+  const layer = document.createElement("div");
+  layer.className = "background-layer";
+
+  // 設定此次動畫時間
+  layer.style.setProperty(
+    "--fade-duration",
+    `${fadeDuration}ms`
+  );
+
+  if (exists) {
+    layer.style.backgroundImage = `url("${src}")`;
+  } else {
+    layer.style.backgroundImage =
+      "linear-gradient(#dce9f7 0%, #eff3f5 47%, #f8e8e2 100%)";
   }
-  overlay.style.backgroundImage = `url("${src}")`;
-  overlay.classList.add("is-visible");
-  // 動畫完成後將新圖設為底圖，讓下一次切換繼續淡入。
+
+  overlay.appendChild(layer);
+
+  void layer.offsetWidth;
+  layer.classList.add("is-visible");
+
   setTimeout(() => {
     if (version !== backgroundVersion) return;
-    base.style.backgroundImage = `url("${src}")`;
-    overlay.classList.remove("is-visible");
-  }, 680);
+
+    base.style.backgroundImage = layer.style.backgroundImage;
+    overlay.replaceChildren();
+
+  }, fadeDuration);
 }
 function renderQuestion() {
-  const q = questions[currentQuestion];
+      const q = questions[currentQuestion];
+
+  // 提前載入當前題目的背景圖片
+  preloadQuestionBackgrounds(currentQuestion);
   $("questionBadge").textContent = `Q${currentQuestion + 1}`;
   $("questionTitle").textContent = q.title;
   $("progressText").textContent = `${currentQuestion + 1} / ${questions.length}`;
@@ -131,27 +142,100 @@ console.log("選項圖片路徑：", src);
     });
     optionsEl.appendChild(button);
   });
-  if (answers[currentQuestion] !== null) {
-  changeBackground(
-    backgroundPath(currentQuestion, answers[currentQuestion])
-  );
-} else {
-  changeBackground(
-    defaultBackgroundPath(currentQuestion)
-  );
+    if (answers[currentQuestion] !== null) {
+    changeBackground(
+        backgroundPath(currentQuestion, answers[currentQuestion]),
+        350
+    );
+    } else {
+    changeBackground(
+        defaultBackgroundPath(currentQuestion),
+        350
+    );
+    }
 }
-}
+
+
 function showResult() {
+
+  // 1. 確認三題皆已作答
+  if (answers.some(answer => answer === null)) {
+    return;
+  }
+
+  // 2. 計算 Baseline 推薦結果
+  const result = calculateBaselineRecommendation(answers);
+
+  const {
+    baselineProfile,
+    recommendation,
+    scores,
+    isDefault
+  } = result;
+
+  // 3. 切換到結果頁面
   $("quizContent").hidden = true;
   $("result").hidden = false;
-  $("answerSummary").innerHTML = answers.map((a, i) =>
-    `<div class="answer-row"><span>Q${i + 1} · ${questions[i].folder}</span><strong>${letters[a]}（${3 - a} 分）</strong></div>`
-  ).join("");
-  console.log("Initial 問卷結果：", {
-    answers: answers.map(i => letters[i]),
-    scores: answers.map(i => 3 - i)
-  });
+
+  // 4. 三題對應的 Baseline 維度
+  const dimensionNames = [
+    "壓力／焦慮",
+    "低能量",
+    "思緒負荷"
+  ];
+
+  // 5. 顯示三題答案
+  const answerHTML = answers.map((answer, index) => `
+    <div class="answer-row">
+      <span>Q${index + 1} · ${dimensionNames[index]}</span>
+      <strong>
+        ${letters[answer]}（${3 - answer} 分）
+      </strong>
+    </div>
+  `).join("");
+
+  // 6. 顯示推薦結果
+  const recommendationHTML = `
+    <h3>你的個人化推薦結果</h3>
+
+    <div class="answer-row">
+      <span>冥想場景 SCENE</span>
+      <strong>
+        ${BASELINE_LABELS.scene[recommendation.scene]}
+      </strong>
+    </div>
+
+    <div class="answer-row">
+      <span>呼吸方式 BREATHING</span>
+      <strong>
+        ${BASELINE_LABELS.breathing[recommendation.breathing]}
+      </strong>
+    </div>
+
+    ${isDefault
+      ? "<p>目前三個維度皆為零，採用預設推薦。</p>"
+      : ""}
+  `;
+
+  // 7. 將結果顯示在網頁
+  $("answerSummary").innerHTML =
+    answerHTML + recommendationHTML;
+
+  // 8. 整理推薦結果 JSON
+  const resultData = {
+    baselineProfile,
+    current_recommendation: recommendation
+  };
+
+  // 9. Console 輸出
+  console.log("問卷答案：", answers);
+  console.log("Baseline Profile：", baselineProfile);
+  console.log("推薦結果：", recommendation);
+  console.log("完整 JSON：", resultData);
+  console.log("候選項目分數：", scores);
 }
+
+
 $("nextButton").addEventListener("click", () => {
   if (answers[currentQuestion] === null) return;
   if (currentQuestion === questions.length - 1) showResult();
@@ -166,3 +250,48 @@ $("restartButton").addEventListener("click", () => {
   renderQuestion();
 });
 renderQuestion();
+
+function preloadQuestionBackgrounds(questionIndex) {
+  // 預載預設背景
+  const defaultImg = new Image();
+  defaultImg.src = defaultBackgroundPath(questionIndex);
+
+  // 預載 A、B、C、D 四張背景
+  for (let i = 0; i < 4; i++) {
+    const img = new Image();
+    img.src = backgroundPath(questionIndex, i);
+  }
+}
+
+
+function recommendSceneBalanced(answers) {
+  // answers: [Q1, Q2, Q3]
+  // A=0, B=1, C=2, D=3
+
+  const [stress, lowEnergy, cognitiveLoad] = answers;
+
+  if (answers.some(a => a === null || a === undefined)) {
+    throw new Error("請先完成三題問卷");
+  }
+
+  // Q3：思緒負荷較高
+  if (cognitiveLoad <= 1) {
+
+    // Q1：壓力較高 → 海邊
+    if (stress <= 1) {
+      return "seaside";
+    }
+
+    // Q1：壓力較低 → 山群
+    return "mountain";
+  }
+
+  // Q3：思緒負荷較低
+  // Q2：低能量較高 → 稻田
+  if (lowEnergy <= 1) {
+    return "rice_field";
+  }
+
+  // Q2：低能量較低 → 森林
+  return "forest";
+}

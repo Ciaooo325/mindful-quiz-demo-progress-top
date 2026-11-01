@@ -10,8 +10,32 @@ button { font: inherit; cursor: pointer; }
 .quiz { position: relative; isolation: isolate; width: 100%; min-height: 100svh; overflow: hidden; background: linear-gradient(#dce9f7 0%, #eff3f5 47%, #f8e8e2 100%); }
 .background { position: absolute; inset: 0; z-index: -3; background-position: center center; background-size: cover; background-repeat: no-repeat; }
 .background--base { background-image: linear-gradient(#dce9f7 0%, #eff3f5 47%, #f8e8e2 100%); }
-.background--overlay { opacity: 0; transition: opacity 650ms ease; }
-.background--overlay.is-visible { opacity: 1; }
+/* 背景圖層容器 */
+.background--overlay {
+  opacity: 1;
+  transition: none;
+  z-index: -2;
+}
+
+/* 每次切換產生的新背景 */
+.background-layer {
+  position: absolute;
+  inset: 0;
+
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+
+  opacity: 0;
+  transition: opacity var(--fade-duration, 650ms) linear;
+
+  pointer-events: none;
+}
+
+/* 新圖片逐漸顯示 */
+.background-layer.is-visible {
+  opacity: 1;
+}
 .background-tint { position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(to bottom, rgba(255,255,255,.20), transparent 30%, rgba(255,255,255,.10) 66%, rgba(255,255,255,.22)); }
 .quiz-content { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100svh; max-width: 540px; margin: 0 auto; padding: max(38px, env(safe-area-inset-top)) 22px max(26px, env(safe-area-inset-bottom)); }
 .question-header { text-align: center; padding-top: 12px; }
@@ -21,7 +45,7 @@ button { font: inherit; cursor: pointer; }
 
   width: 75px;
   height: 70px;
-  margin: 0 auto 20px;
+  margin: 0 auto 0px;
 
   background-image: url("assets/ui/question-shell.png");
   background-size: contain;
@@ -93,11 +117,11 @@ h1 { max-width: 380px; margin: 0 auto; font-size: clamp(25px, 6.2vw, 35px); line
 .progress-track { flex: 1; height: 5px; border-radius: 10px; background: #ffffff99; overflow: hidden; }
 .progress-fill { width: 20%; height: 100%; border-radius: 10px; background: #889fbd; transition: width 250ms ease; }
 .navigation { display: flex; justify-content: center; align-items: center; gap: 14px; }
-.next-button, .back-button { border: 0; border-radius: 999px; min-height: 52px; padding: 10px 24px; box-shadow: 0 7px 13px #6d738b32; font-size: 17px; font-weight: 800; letter-spacing: .12em; }
+.next-button, .back-button { border: 0; border-radius: 999px; min-height: 52px; padding: 10px 24px; box-shadow: 0 7px 13px #6d738b32; font-size: 17px; font-weight: 800; letter-spacing: .12em; z-index: 1; }
 .next-button { color: #5b6170; background: #fff6f5ed; }
 .next-button span { margin-left: 7px; }
 .next-button:disabled { opacity: .52; cursor: not-allowed; }
-.back-button { color: #69788d; background: #ffffffa8; font-size: 13px; }
+.back-button { color: #69788d; background: #ffffffa8;  }
 .back-button:disabled { opacity: 0; pointer-events: none; }
 .result { position: relative; z-index: 2; min-height: 100svh; display: grid; place-items: center; padding: 28px; }
 .result[hidden], .quiz-content[hidden] { display: none; }
@@ -124,7 +148,7 @@ h1 { max-width: 380px; margin: 0 auto; font-size: clamp(25px, 6.2vw, 35px); line
   }
 
   .next-button {
-    margin-right:auto;
+
   }
 
   /* ===== 選項圖片大小調整 ===== */
