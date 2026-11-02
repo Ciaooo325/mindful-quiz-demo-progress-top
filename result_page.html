@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>心境探索｜專屬推薦小卡</title>
+  <link rel="stylesheet" href="result_page.css" />
+  <script src="result_page.js" defer></script>
+</head>
+<body>
+<audio id="previewAudio" preload="metadata"></audio>
+
+  <main class="result-page">
+    <button class="back-button" id="backToQuiz" type="button" aria-label="返回問卷">‹</button>
+    <div class="result-card" id="resultCard">
+      <img id="cardImage" src="assets/results/seaside-front.png" alt="專屬心境小卡正面" />
+      <!-- 小卡背面才顯示，遮住原 QR Code 區塊 -->
+      
+<!-- 小卡背面音樂入口 -->
+
+<!-- 小卡背面 CD 音樂試聽 -->
+
+<!-- 小卡背面 CD：點擊進入音樂播放器 -->
+<div class="music-entry" id="musicEntry" hidden>
+
+  <button
+    class="mini-cd"
+    id="miniCdButton"
+    type="button"
+    aria-label="前往推薦音樂播放器"
+  >
+
+    <span
+      class="mini-cd-disc"
+      id="miniCdDisc"
+      aria-hidden="true">
+    </span>
+
+    <span
+      class="mini-cd-center"
+      aria-hidden="true">
+    </span>
+
+  </button>
+
+</div>
+
+
+
+    </div>
+    <p id="recommendationText" class="recommendation-text"></p>
+
+    
+<div class="result-actions">
+
+  <!-- 小卡翻面 -->
+  <button
+    class="flip-button"
+    id="flipCard"
+    type="button">
+    翻到小卡背面 →
+  </button>
+
+  <!-- 聆聽音樂 -->
+  <button
+    class="listen-button"
+    id="openMusic"
+    type="button"
+    hidden>
+    ♫ 點擊聆聽音樂
+  </button>
+
+</div>
+
+
+
+
+    <!-- <button class="flip-button" id="flipCard" type="button">翻到小卡背面 →</button>
+    <p class="tip">點擊小卡也可以翻面</p> -->
+
+
+  </main>
+</body>
+</html>
