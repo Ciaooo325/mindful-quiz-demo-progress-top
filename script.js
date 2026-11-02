@@ -83,7 +83,7 @@ async function changeBackground(src, fadeDuration = BACKGROUND_FADE_MS) {
     layer.style.backgroundImage =
       "linear-gradient(#dce9f7 0%, #eff3f5 47%, #f8e8e2 100%)";
   }
-
+  overlay.replaceChildren();
   overlay.appendChild(layer);
 
   void layer.offsetWidth;
@@ -97,6 +97,7 @@ async function changeBackground(src, fadeDuration = BACKGROUND_FADE_MS) {
 
   }, fadeDuration);
 }
+
 function renderQuestion() {
       const q = questions[currentQuestion];
 
@@ -158,14 +159,16 @@ console.log("選項圖片路徑：", src);
 
 function showResult() {
 
-  // 1. 確認三題皆已作答
+  // 1. 確認三題皆已完成
   if (answers.some(answer => answer === null)) {
+    console.warn("問卷尚未完成");
     return;
   }
 
-  // 2. 計算 Baseline 推薦結果
+  // 2. 呼叫 Baseline 推薦演算法
   const result = calculateBaselineRecommendation(answers);
 
+  // 3. 取得計算結果
   const {
     baselineProfile,
     recommendation,
@@ -173,67 +176,39 @@ function showResult() {
     isDefault
   } = result;
 
-  // 3. 切換到結果頁面
-  $("quizContent").hidden = true;
-  $("result").hidden = false;
-
-  // 4. 三題對應的 Baseline 維度
-  const dimensionNames = [
-    "壓力／焦慮",
-    "低能量",
-    "思緒負荷"
-  ];
-
-  // 5. 顯示三題答案
-  const answerHTML = answers.map((answer, index) => `
-    <div class="answer-row">
-      <span>Q${index + 1} · ${dimensionNames[index]}</span>
-      <strong>
-        ${letters[answer]}（${3 - answer} 分）
-      </strong>
-    </div>
-  `).join("");
-
-  // 6. 顯示推薦結果
-  const recommendationHTML = `
-    <h3>你的個人化推薦結果</h3>
-
-    <div class="answer-row">
-      <span>冥想場景 SCENE</span>
-      <strong>
-        ${BASELINE_LABELS.scene[recommendation.scene]}
-      </strong>
-    </div>
-
-    <div class="answer-row">
-      <span>呼吸方式 BREATHING</span>
-      <strong>
-        ${BASELINE_LABELS.breathing[recommendation.breathing]}
-      </strong>
-    </div>
-
-    ${isDefault
-      ? "<p>目前三個維度皆為零，採用預設推薦。</p>"
-      : ""}
-  `;
-
-  // 7. 將結果顯示在網頁
-  $("answerSummary").innerHTML =
-    answerHTML + recommendationHTML;
-
-  // 8. 整理推薦結果 JSON
+  // 4. 整理需要傳到小卡頁面的資料
   const resultData = {
+    answers: [...answers],
     baselineProfile,
-    current_recommendation: recommendation
+    recommendation,
+    scores,
+    isDefault
   };
 
-  // 9. Console 輸出
+  // 5. 儲存推薦結果
+  sessionStorage.setItem(
+    "mindfulQuizRecommendation",
+    JSON.stringify(resultData)
+  );
+
+  // 6. 同步儲存推薦場景
+  // 之後音樂播放器也會使用這個值
+  sessionStorage.setItem(
+    "mindfulSelectedScene",
+    recommendation.scene
+  );
+
+  // 7. Console 測試資訊
   console.log("問卷答案：", answers);
   console.log("Baseline Profile：", baselineProfile);
-  console.log("推薦結果：", recommendation);
-  console.log("完整 JSON：", resultData);
-  console.log("候選項目分數：", scores);
+  console.log("推薦場景：", recommendation.scene);
+  console.log("推薦呼吸：", recommendation.breathing);
+  console.log("完整結果：", resultData);
+
+  // 8. 前往推薦小卡頁面
+  window.location.href = "result_page.html";
 }
+
 
 
 $("nextButton").addEventListener("click", () => {
@@ -264,34 +239,38 @@ function preloadQuestionBackgrounds(questionIndex) {
 }
 
 
-function recommendSceneBalanced(answers) {
-  // answers: [Q1, Q2, Q3]
-  // A=0, B=1, C=2, D=3
+// function recommendSceneBalanced(answers) {
+//   // answers: [Q1, Q2, Q3]
+//   // A=0, B=1, C=2, D=3
 
-  const [stress, lowEnergy, cognitiveLoad] = answers;
+//   const [stress, lowEnergy, cognitiveLoad] = answers;
 
-  if (answers.some(a => a === null || a === undefined)) {
-    throw new Error("請先完成三題問卷");
-  }
+//   if (answers.some(a => a === null || a === undefined)) {
+//     throw new Error("請先完成三題問卷");
+//   }
 
-  // Q3：思緒負荷較高
-  if (cognitiveLoad <= 1) {
+//   // Q3：思緒負荷較高
+//   if (cognitiveLoad <= 1) {
 
-    // Q1：壓力較高 → 海邊
-    if (stress <= 1) {
-      return "seaside";
-    }
+//     // Q1：壓力較高 → 海邊
+//     if (stress <= 1) {
+//       return "seaside";
+//     }
 
-    // Q1：壓力較低 → 山群
-    return "mountain";
-  }
+//     // Q1：壓力較低 → 山群
+//     return "mountain";
+//   }
 
-  // Q3：思緒負荷較低
-  // Q2：低能量較高 → 稻田
-  if (lowEnergy <= 1) {
-    return "rice_field";
-  }
+//   // Q3：思緒負荷較低
+//   // Q2：低能量較高 → 稻田
+//   if (lowEnergy <= 1) {
+//     return "rice_field";
+//   }
 
-  // Q2：低能量較低 → 森林
-  return "forest";
-}
+//   // Q2：低能量較低 → 森林
+//   return "forest";
+// }
+
+
+
+

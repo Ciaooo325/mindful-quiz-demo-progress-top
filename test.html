@@ -1,0 +1,856 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+  <title>夢幻冥想音樂播放器</title>
+
+  <style>
+    :root {
+      --text: #676b8c;
+      --primary: #9699c7;
+      --light-primary: #c6c7e3;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      color: var(--text);
+      background: #cbd4f3;
+      overflow-x: hidden;
+    }
+
+    /* ===== 動態場景背景 ===== */
+
+    .background {
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(
+          rgba(231, 220, 252, 0.12),
+          rgba(241, 224, 251, 0.26)
+        ),
+        url("assets/sea-bg.jpg")
+        center / cover no-repeat;
+      z-index: -2;
+      transition: opacity 0.5s ease;
+    }
+
+    .background::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(
+          to bottom,
+          rgba(220, 218, 251, 0.12),
+          rgba(242, 226, 250, 0.34)
+        );
+    }
+
+    /* ===== 手機版外框 ===== */
+
+    .app {
+      width: 100%;
+      max-width: 430px;
+      min-height: 100dvh;
+      margin: auto;
+      padding: 28px 18px 38px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* ===== 返回按鈕 ===== */
+
+    .top-bar {
+      margin-bottom: 20px;
+      padding-left: 8px;
+    }
+
+    .back-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,.9);
+      background: rgba(255,255,255,.48);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 6px 18px rgba(115,112,165,.12);
+      color: var(--text);
+      font-size: 32px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== 玻璃音樂播放器 ===== */
+
+    .player {
+      width: 100%;
+      padding: 42px 22px 40px;
+      border-radius: 46px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255,255,255,.53),
+          rgba(239,231,251,.62)
+        );
+
+      border: 1.5px solid rgba(255,255,255,.8);
+
+      backdrop-filter: blur(26px);
+      -webkit-backdrop-filter: blur(26px);
+
+      box-shadow:
+        inset 0 2px 8px rgba(255,255,255,.9),
+        inset 0 -4px 16px rgba(210,199,237,.25),
+        0 16px 45px rgba(130,120,174,.16);
+
+      text-align: center;
+    }
+
+    /* ===== CD 區域 ===== */
+
+    .cd-area {
+      width: min(76vw, 285px);
+      aspect-ratio: 1;
+      margin: 0 auto 30px;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    .cd-glow {
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.22);
+      filter: blur(20px);
+    }
+
+    .cd {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      border-radius: 50%;
+      overflow: hidden;
+
+      border: 6px solid rgba(255,255,255,.95);
+
+      background:
+        url("assets/sea-cd.jpg")
+        center / cover no-repeat;
+
+      box-shadow:
+        0 12px 30px rgba(98,100,154,.19),
+        0 0 22px rgba(255,255,255,.7);
+
+      animation: cdRotate 35s linear infinite;
+      animation-play-state: paused;
+    }
+
+    .cd.playing {
+      animation-play-state: running;
+    }
+
+    /* CD 表面柔光 */
+
+    .cd::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background:
+        linear-gradient(
+          125deg,
+          rgba(255,255,255,.35),
+          transparent 38%,
+          rgba(255,255,255,.12) 68%,
+          transparent
+        );
+    }
+
+    /* CD 中央圓環 */
+
+    .cd-center {
+      position: absolute;
+      width: 31%;
+      height: 31%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+
+      background:
+        radial-gradient(
+          circle,
+          #aaaed0 0 21%,
+          rgba(255,255,255,.95) 23% 25%,
+          #f5f0fa 27% 64%,
+          #c9cbe3 100%
+        );
+
+      border: 2px solid rgba(255,255,255,.7);
+      box-shadow: 0 3px 12px rgba(93,94,142,.16);
+    }
+
+    @keyframes cdRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* CD 周圍裝飾光 */
+
+    .sparkle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 0 12px 5px rgba(255,255,255,.8);
+      animation: twinkle 3s ease-in-out infinite alternate;
+    }
+
+    .sparkle.one { top: 8%; left: 18%; }
+    .sparkle.two { top: 13%; right: 6%; animation-delay: 1s; }
+    .sparkle.three { bottom: 14%; right: 3%; animation-delay: 2s; }
+
+    @keyframes twinkle {
+      from { opacity: .25; transform: scale(.7); }
+      to { opacity: 1; transform: scale(1.3); }
+    }
+
+    /* ===== 音樂文字資訊 ===== */
+
+    .music-title {
+      font-size: clamp(29px, 8vw, 39px);
+      font-weight: 800;
+      letter-spacing: 4px;
+      margin-bottom: 8px;
+      color: #686b8e;
+    }
+
+    .music-description {
+      font-size: 16px;
+      letter-spacing: 1.5px;
+      line-height: 1.7;
+      margin-bottom: 18px;
+    }
+
+    .tags {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-bottom: 34px;
+    }
+
+    .tag {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      padding: 9px 17px;
+      border-radius: 25px;
+
+      background: rgba(255,255,255,.37);
+      border: 1px solid rgba(255,255,255,.85);
+
+      box-shadow:
+        inset 0 1px 2px rgba(255,255,255,.8),
+        0 5px 14px rgba(141,132,181,.1);
+    }
+
+    /* ===== 音樂進度條 ===== */
+
+    .progress-container {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 33px;
+    }
+
+    .time {
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .progress {
+      flex: 1;
+      width: 100%;
+      height: 7px;
+      border-radius: 20px;
+      background:
+        linear-gradient(
+          to right,
+          var(--primary) 0%,
+          var(--primary) var(--progress, 0%),
+          rgba(153,151,197,.25) var(--progress, 0%),
+          rgba(153,151,197,.25) 100%
+        );
+    }
+
+    .progress::-webkit-slider-thumb {
+      appearance: none;
+      width: 19px;
+      height: 19px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 3px 10px rgba(105,108,169,.22);
+    }
+
+    .progress::-moz-range-thumb {
+      width: 19px;
+      height: 19px;
+      border: none;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 3px 10px rgba(105,108,169,.22);
+    }
+
+    /* ===== 播放控制 ===== */
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .control-btn {
+      appearance: none;
+      background: none;
+      border: none;
+      color: #898cad;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      padding: 8px;
+      touch-action: manipulation;
+    }
+
+    .control-btn svg {
+      width: 29px;
+      height: 29px;
+      fill: currentColor;
+    }
+
+    .play-btn {
+      width: 92px;
+      height: 92px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      border: 4px solid rgba(255,255,255,.94);
+
+      background:
+        linear-gradient(
+          135deg,
+          #adb1d7,
+          #8f93c3
+        );
+
+      color: white;
+      cursor: pointer;
+
+      display: grid;
+      place-items: center;
+
+      box-shadow:
+        0 8px 22px rgba(115,113,174,.24),
+        inset 0 2px 8px rgba(255,255,255,.2);
+
+      transition: transform .2s;
+    }
+
+    .play-btn:active {
+      transform: scale(.95);
+    }
+
+    .play-btn svg {
+      width: 38px;
+      height: 38px;
+      fill: white;
+    }
+
+    .mute-btn {
+      width: 47px;
+      height: 47px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.4);
+      border: 1px solid rgba(255,255,255,.8);
+      box-shadow: 0 5px 14px rgba(117,111,160,.1);
+    }
+
+    .mute-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* ===== 小螢幕優化 ===== */
+
+    @media (max-width: 360px) {
+      .app { padding: 16px 12px 25px; }
+      .player { padding: 31px 16px 32px; border-radius: 36px; }
+      .cd-area { width: 72vw; }
+      .music-description { font-size: 14px; }
+      .tag { font-size: 12px; padding: 8px 11px; }
+      .play-btn { width: 76px; height: 76px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cd, .sparkle { animation: none; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="background" id="background"></div>
+
+  <main class="app">
+
+    <div class="top-bar">
+      <button class="back-btn" onclick="history.back()" aria-label="返回">
+        &#8249;
+      </button>
+    </div>
+
+    <section class="player">
+
+      <!-- CD 封面 -->
+      <div class="cd-area">
+        <div class="cd-glow"></div>
+
+        <div class="cd" id="cd">
+          <div class="cd-center"></div>
+        </div>
+
+        <span class="sparkle one"></span>
+        <span class="sparkle two"></span>
+        <span class="sparkle three"></span>
+      </div>
+
+      <!-- 音樂資訊 -->
+      <h1 class="music-title" id="musicTitle">
+        海浪輕拍
+      </h1>
+
+      <p class="music-description" id="musicDescription">
+        自然海浪聲，結合輕柔旋律
+      </p>
+
+      <div class="tags" id="musicTags"></div>
+
+      <!-- 音樂進度 -->
+      <div class="progress-container">
+
+        <span class="time" id="currentTime">00:00</span>
+
+        <input
+          id="progress"
+          class="progress"
+          type="range"
+          min="0"
+          max="100"
+          value="0"
+          aria-label="音樂播放進度"
+        >
+
+        <span class="time" id="duration">00:00</span>
+      </div>
+
+      <!-- 播放器操作 -->
+      <div class="controls">
+
+        <button class="control-btn" id="prevBtn" aria-label="上一首">
+          <svg viewBox="0 0 24 24">
+            <path d="M6 4h2v16H6zm3 8 11-8v16z"/>
+          </svg>
+        </button>
+
+        <button class="play-btn" id="playBtn" aria-label="播放">
+          <svg id="playIcon" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </button>
+
+        <button class="control-btn" id="nextBtn" aria-label="下一首">
+          <svg viewBox="0 0 24 24">
+            <path d="M16 4h2v16h-2zM5 4v16l11-8z"/>
+          </svg>
+        </button>
+
+        <button class="control-btn mute-btn" id="muteBtn" aria-label="靜音">
+          <svg id="volumeIcon" viewBox="0 0 24 24">
+            <path d="M3 9v6h4l5 4V5L7 9H3zm12.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 15.5 12zM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54z"/>
+          </svg>
+        </button>
+
+      </div>
+    </section>
+  </main>
+
+  <audio id="audio" preload="metadata"></audio>
+
+  <script>
+
+    /*
+    ========================================
+       1. 場景與音樂資料設定
+
+       修改這裡就可以：
+       - 更換背景
+       - 更換 CD 封面
+       - 修改音樂名稱
+       - 修改描述
+       - 修改標籤
+       - 更換 MP3 音樂
+    ========================================
+    */
+
+    const scenes = [
+      {
+        title: "海浪輕拍",
+        description: "自然海浪聲，結合輕柔旋律",
+        tags: ["寧靜海邊", "放鬆", "沉澱"],
+
+        background: "assets/sea-bg.jpg",
+        cover: "assets/sea-cd.jpg",
+        audio: "assets/sea.mp3"
+      },
+
+      {
+        title: "森林呢喃",
+        description: "微風吹拂樹梢，聆聽大自然的呼吸",
+        tags: ["靜謐森林", "療癒", "舒緩"],
+
+        background: "assets/forest-bg.jpg",
+        cover: "assets/forest-cd.jpg",
+        audio: "assets/forest.mp3"
+      },
+
+      {
+        title: "山間微風",
+        description: "山巒間的微風，帶來平靜與安定",
+        tags: ["山群", "安定", "冥想"],
+
+        background: "assets/mountain-bg.jpg",
+        cover: "assets/mountain-cd.jpg",
+        audio: "assets/mountain.mp3"
+      },
+
+      {
+        title: "金色麥浪",
+        description: "微風輕撫麥田，感受大地的溫柔",
+        tags: ["麥田", "溫暖", "放空"],
+
+        background: "assets/field-bg.jpg",
+        cover: "assets/field-cd.jpg",
+        audio: "assets/field.mp3"
+      }
+    ];
+
+    /*
+    ========================================
+       2. 取得 HTML 元素
+    ========================================
+    */
+
+    const audio = document.getElementById("audio");
+    const cd = document.getElementById("cd");
+    const background = document.getElementById("background");
+
+    const musicTitle = document.getElementById("musicTitle");
+    const musicDescription = document.getElementById("musicDescription");
+    const musicTags = document.getElementById("musicTags");
+
+    const currentTimeEl = document.getElementById("currentTime");
+    const durationEl = document.getElementById("duration");
+    const progress = document.getElementById("progress");
+
+    const playBtn = document.getElementById("playBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const muteBtn = document.getElementById("muteBtn");
+
+    const playIcon = document.getElementById("playIcon");
+    const volumeIcon = document.getElementById("volumeIcon");
+
+    let currentSceneIndex = 0;
+
+    /*
+    ========================================
+       3. 時間格式轉換
+    ========================================
+    */
+
+    function formatTime(seconds) {
+      if (!Number.isFinite(seconds)) return "00:00";
+
+      const minutes = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+
+      return String(minutes).padStart(2, "0")
+        + ":" + String(secs).padStart(2, "0");
+    }
+
+    /*
+    ========================================
+       4. 載入場景
+    ========================================
+    */
+
+    function loadScene(index, autoplay = false) {
+
+      currentSceneIndex =
+        (index + scenes.length) % scenes.length;
+
+      const scene = scenes[currentSceneIndex];
+
+      // 更新場景背景
+      background.style.backgroundImage =
+        `linear-gradient(
+          rgba(231,220,252,.12),
+          rgba(241,224,251,.26)
+        ), url("${scene.background}")`;
+
+      // 更新 CD 封面
+      cd.style.backgroundImage = `url("${scene.cover}")`;
+
+      // 更新標題與描述
+      musicTitle.textContent = scene.title;
+      musicDescription.textContent = scene.description;
+
+      // 更新標籤
+      musicTags.innerHTML = "";
+
+      scene.tags.forEach(tagText => {
+        const tag = document.createElement("span");
+        tag.className = "tag";
+        tag.textContent = tagText;
+        musicTags.appendChild(tag);
+      });
+
+      // 載入音檔
+      audio.pause();
+      audio.src = scene.audio;
+      audio.load();
+
+      currentTimeEl.textContent = "00:00";
+      durationEl.textContent = "00:00";
+      progress.value = 0;
+      updateProgressStyle();
+
+      cd.classList.remove("playing");
+      updatePlayIcon(false);
+
+      // 切歌時可自動播放
+      if (autoplay) {
+        playMusic();
+      }
+    }
+
+    /*
+    ========================================
+       5. 播放與暫停
+    ========================================
+    */
+
+    async function playMusic() {
+      try {
+        await audio.play();
+      } catch (error) {
+        console.warn("音樂播放失敗，請確認 MP3 路徑。", error);
+      }
+    }
+
+    function pauseMusic() {
+      audio.pause();
+    }
+
+    function togglePlay() {
+      if (audio.paused) {
+        playMusic();
+      } else {
+        pauseMusic();
+      }
+    }
+
+    function updatePlayIcon(isPlaying) {
+
+      if (isPlaying) {
+        // 暫停圖示
+        playIcon.innerHTML =
+          '<path d="M6 4h4v16H6zm8 0h4v16h-4z"/>';
+        playBtn.setAttribute("aria-label", "暫停");
+      } else {
+        // 播放圖示
+        playIcon.innerHTML =
+          '<path d="M8 5v14l11-7z"/>';
+        playBtn.setAttribute("aria-label", "播放");
+      }
+    }
+
+    audio.addEventListener("play", () => {
+      cd.classList.add("playing");
+      updatePlayIcon(true);
+    });
+
+    audio.addEventListener("pause", () => {
+      cd.classList.remove("playing");
+      updatePlayIcon(false);
+    });
+
+    playBtn.addEventListener("click", togglePlay);
+
+    /*
+    ========================================
+       6. 上一首與下一首
+    ========================================
+    */
+
+    prevBtn.addEventListener("click", () => {
+      loadScene(currentSceneIndex - 1, !audio.paused);
+    });
+
+    nextBtn.addEventListener("click", () => {
+      loadScene(currentSceneIndex + 1, !audio.paused);
+    });
+
+    /*
+    ========================================
+       7. 自動取得 MP3 長度
+    ========================================
+    */
+
+    audio.addEventListener("loadedmetadata", () => {
+      durationEl.textContent = formatTime(audio.duration);
+    });
+
+    /*
+    ========================================
+       8. 更新音樂進度條
+    ========================================
+    */
+
+    function updateProgressStyle() {
+      progress.style.setProperty(
+        "--progress",
+        progress.value + "%"
+      );
+    }
+
+    audio.addEventListener("timeupdate", () => {
+
+      currentTimeEl.textContent =
+        formatTime(audio.currentTime);
+
+      if (Number.isFinite(audio.duration) && audio.duration > 0) {
+        progress.value =
+          (audio.currentTime / audio.duration) * 100;
+      }
+
+      updateProgressStyle();
+    });
+
+    // 使用者拖曳進度條
+    progress.addEventListener("input", () => {
+
+      if (!Number.isFinite(audio.duration) || audio.duration <= 0) {
+        return;
+      }
+
+      audio.currentTime =
+        (Number(progress.value) / 100) * audio.duration;
+
+      currentTimeEl.textContent =
+        formatTime(audio.currentTime);
+
+      updateProgressStyle();
+    });
+
+    /*
+    ========================================
+       9. 音樂結束後自動切下一首
+    ========================================
+    */
+
+    audio.addEventListener("ended", () => {
+      loadScene(currentSceneIndex + 1, true);
+    });
+
+    /*
+    ========================================
+       10. 靜音功能
+    ========================================
+    */
+
+    muteBtn.addEventListener("click", () => {
+
+      audio.muted = !audio.muted;
+
+      if (audio.muted) {
+
+        volumeIcon.innerHTML =
+          '<path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3 3.5-3.5-1.4-1.4-3.5 3.5-3.5-3.5-1.4 1.4 3.5 3.5-3.5 3.5 1.4 1.4 3.5-3.5 3.5 3.5 1.4-1.4z"/>';
+
+        muteBtn.setAttribute("aria-label", "取消靜音");
+
+      } else {
+
+        volumeIcon.innerHTML =
+          '<path d="M3 9v6h4l5 4V5L7 9H3zm12.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 15.5 12zM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54z"/>';
+
+        muteBtn.setAttribute("aria-label", "靜音");
+      }
+    });
+
+    /*
+    ========================================
+       11. 對外提供切換場景功能
+
+       例如：
+       switchScene("forest");
+       switchScene("sea");
+    ========================================
+    */
+
+    function switchScene(sceneName) {
+
+      const sceneMap = {
+        sea: 0,
+        forest: 1,
+        mountain: 2,
+        field: 3
+      };
+
+      if (sceneMap[sceneName] !== undefined) {
+        loadScene(sceneMap[sceneName], false);
+      }
+    }
+
+    // 首次載入海邊場景
+    loadScene(0);
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,430 @@
+
+/* ========================================
+   1. 全域設定
+======================================== */
+
+:root {
+  color-scheme: light;
+
+  --text-color: #65779a;
+  --primary-color: #969ac6;
+  --white-glass: rgba(255, 255, 255, 0.68);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+
+  font-family:
+    "Noto Sans TC",
+    "Microsoft JhengHei",
+    sans-serif;
+
+  color: var(--text-color);
+
+  /* 淡紫色夢幻漸層背景 */
+  background: linear-gradient(
+    180deg,
+    #E5EAF7 0%,
+    #F0EAF5 55%,
+    #F8EEF4 100%
+  );
+}
+
+
+/* ========================================
+   2. 結果頁主要排版
+======================================== */
+
+.result-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  position: relative;
+
+  padding: 65px 12px 30px;
+  gap: 12px;
+}
+
+
+/* ========================================
+   3. 左上角返回按鈕
+======================================== */
+
+.back-button {
+  position: absolute;
+  z-index: 10;
+
+  top: max(15px, env(safe-area-inset-top));
+  left: 18px;
+
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+
+  color: #67769d;
+  font-size: 32px;
+
+  cursor: pointer;
+}
+
+
+/* ========================================
+   4. 小卡本體
+======================================== */
+
+.result-card {
+  position: relative;
+
+  width: min(
+    100%,
+    360px,
+    calc((100dvh - 155px) * 360 / 598)
+  );
+
+  aspect-ratio: 360 / 598;
+
+  border-radius: 10px;
+  overflow: hidden;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 12px 34px rgba(85, 102, 153, 0.16);
+}
+
+/* 小卡圖片 */
+
+.result-card img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+
+/* ========================================
+   5. 小卡背面 CD 入口
+======================================== */
+
+/* ===== 小卡背面 CD 入口 ===== */
+
+.music-entry {
+  position: absolute;
+
+  /* CD 在小卡上的位置 */
+  left: 8.5%;
+  top: 36.5%;
+
+  width: 34%;
+  height: 24%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* 移除背景、邊框與陰影 */
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+
+  z-index: 5;
+}
+
+.music-entry[hidden] {
+  display: none;
+}
+
+
+/* 隱藏音樂入口 */
+
+.music-entry[hidden] {
+  display: none;
+}
+
+
+/* ========================================
+   6. 可點擊的 CD 圖片
+======================================== */
+
+.mini-cd {
+  position: relative;
+
+  width: min(100%, 104px);
+  aspect-ratio: 1;
+
+  display: block;
+  padding: 0;
+
+  border: none;
+  border-radius: 50%;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.9),
+    0 4px 12px rgba(106, 111, 164, 0.2);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* 滑鼠移入 CD */
+
+.mini-cd:hover {
+  transform: scale(1.04);
+
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.95),
+    0 6px 16px rgba(106, 111, 164, 0.25);
+}
+
+/* 點擊 CD */
+
+.mini-cd:active {
+  transform: scale(0.96);
+}
+
+
+/* ========================================
+   7. CD 封面
+======================================== */
+
+.mini-cd-disc {
+  position: absolute;
+  inset: 0;
+
+  border-radius: 50%;
+
+  border: 3px solid rgba(255, 255, 255, 0.95);
+
+  background-color: #cbd6e9;
+
+  /* 圖片由 result_page.js 動態設定 */
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+
+/* ========================================
+   8. CD 中央圓孔
+======================================== */
+
+.mini-cd-center {
+  position: absolute;
+
+  width: 27%;
+  aspect-ratio: 1;
+
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  border-radius: 50%;
+
+  background: radial-gradient(
+    circle,
+    #a7acce 0 23%,
+    #f8f6ff 25% 100%
+  );
+
+  border: 1px solid white;
+
+  box-shadow:
+    0 0 3px rgba(100, 100, 150, 0.2);
+}
+
+
+/* ========================================
+   9. 推薦結果文字
+======================================== */
+
+.recommendation-text {
+  margin: 0;
+
+  text-align: center;
+
+  font-size: 13px;
+  line-height: 1.6;
+
+  color: #727b9d;
+}
+
+
+/* ========================================
+   10. 小卡下方操作按鈕
+======================================== */
+
+.result-actions {
+  width: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* 兩顆按鈕共同樣式 */
+
+.flip-button,
+.listen-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 42px;
+
+  padding: 11px 16px;
+
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 30px;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  white-space: nowrap;
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* 翻面按鈕 */
+
+.flip-button {
+  background: rgba(255, 255, 255, 0.68);
+
+  color: #67749a;
+}
+
+/* 聆聽音樂按鈕 */
+
+.listen-button {
+  background: linear-gradient(
+    135deg,
+    #ADB2D7,
+    #9196C5
+  );
+
+  color: white;
+
+  box-shadow:
+    0 4px 12px rgba(114, 117, 170, 0.16);
+}
+
+/* 滑鼠移入效果 */
+
+.flip-button:hover,
+.listen-button:hover {
+  box-shadow:
+    0 5px 15px rgba(114, 117, 170, 0.2);
+}
+
+/* 點擊效果 */
+
+.flip-button:active,
+.listen-button:active {
+  transform: scale(0.96);
+}
+
+/* 隱藏聆聽音樂按鈕 */
+
+.listen-button[hidden] {
+  display: none;
+}
+
+
+/* ========================================
+   11. 操作提示文字
+======================================== */
+
+.tip {
+  margin: -3px 0 0;
+
+  font-size: 11px;
+  text-align: center;
+
+  color: #7e88a9;
+  opacity: 0.65;
+}
+
+
+/* ========================================
+   12. 小手機版優化
+======================================== */
+
+@media (max-width: 350px) {
+
+  .result-page {
+    padding: 65px 10px 24px;
+    gap: 10px;
+  }
+
+  .result-actions {
+    gap: 6px;
+  }
+
+  .flip-button,
+  .listen-button {
+    min-height: 38px;
+    padding: 9px 11px;
+
+    font-size: 12px;
+  }
+
+  .music-entry {
+    padding: 5px;
+  }
+
+  .mini-cd {
+    width: min(100%, 90px);
+  }
+
+  .recommendation-text {
+    font-size: 12px;
+  }
+}
+
+
+/* ========================================
+   13. 減少動態效果偏好
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .mini-cd,
+  .flip-button,
+  .listen-button {
+    transition: none;
+  }
+}

@@ -1,0 +1,536 @@
+ :root {
+      --text: #676b8c;
+      --primary: #9699c7;
+      --light-primary: #c6c7e3;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      color: var(--text);
+      background: #cbd4f3;
+      overflow-x: hidden;
+    }
+
+    /* ===== 動態場景背景 ===== */
+
+    
+/* ===== 動態場景背景 ===== */
+
+.background {
+  position: fixed;
+  inset: 0;
+
+  /* 預設背景顏色 */
+  background-color: #cbd4f3;
+
+  /* 背景圖片由 JavaScript 設定 */
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+
+  z-index: -2;
+
+  transition: opacity 0.5s ease;
+}
+
+
+    .background::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(
+          to bottom,
+          rgba(220, 218, 251, 0.12),
+          rgba(242, 226, 250, 0.34)
+        );
+    }
+
+    /* ===== 手機版外框 ===== */
+
+    .app {
+      width: 100%;
+      max-width: 430px;
+      min-height: 100dvh;
+      margin: auto;
+      padding: 28px 18px 38px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* ===== 返回按鈕 ===== */
+
+    .top-bar {
+      margin-bottom: 20px;
+      padding-left: 8px;
+    }
+
+    .back-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,.9);
+      background: rgba(255,255,255,.48);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 6px 18px rgba(115,112,165,.12);
+      color: var(--text);
+      font-size: 32px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== 玻璃音樂播放器 ===== */
+
+    .player {
+      width: 100%;
+      padding: 42px 22px 40px;
+      border-radius: 46px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255,255,255,.53),
+          rgba(239,231,251,.62)
+        );
+
+      border: 1.5px solid rgba(255,255,255,.8);
+
+      backdrop-filter: blur(26px);
+      -webkit-backdrop-filter: blur(26px);
+
+      box-shadow:
+        inset 0 2px 8px rgba(255,255,255,.9),
+        inset 0 -4px 16px rgba(210,199,237,.25),
+        0 16px 45px rgba(130,120,174,.16);
+
+      text-align: center;
+    }
+
+    /* ===== CD 區域 ===== */
+
+    .cd-area {
+      width: min(76vw, 285px);
+      aspect-ratio: 1;
+      margin: 0 auto 30px;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    .cd-glow {
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.22);
+      filter: blur(20px);
+    }
+
+    
+/* ===== CD 唱片 ===== */
+.cd {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+
+  border: 3px solid rgba(255,255,255,.95);
+
+  background-color: #dcdcf0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+
+  box-shadow:
+    0 12px 30px rgba(98,100,154,.19),
+    0 0 22px rgba(255,255,255,.7);
+
+  animation: cdRotate 35s linear infinite;
+  animation-play-state: paused;
+}
+
+/* 音樂播放時開始旋轉 */
+.cd.playing {
+  animation-play-state: running;
+}
+
+
+    .cd.playing {
+      animation-play-state: running;
+    }
+
+    /* CD 表面柔光 */
+
+    .cd::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background:
+        linear-gradient(
+          125deg,
+          rgba(255,255,255,.35),
+          transparent 38%,
+          rgba(255,255,255,.12) 68%,
+          transparent
+        );
+    }
+
+    /* CD 中央圓環 */
+
+    .cd-center {
+      position: absolute;
+      width: 31%;
+      height: 31%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+
+      background:
+        radial-gradient(
+          circle,
+          #aaaed0 0 21%,
+          rgba(255,255,255,.95) 23% 25%,
+          #f5f0fa 27% 64%,
+          #c9cbe3 100%
+        );
+
+      border: 2px solid rgba(255,255,255,.7);
+      box-shadow: 0 3px 12px rgba(93,94,142,.16);
+    }
+
+    @keyframes cdRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* CD 周圍裝飾光 */
+
+    .sparkle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 0 12px 5px rgba(255,255,255,.8);
+      animation: twinkle 3s ease-in-out infinite alternate;
+    }
+
+    .sparkle.one { top: 8%; left: 18%; }
+    .sparkle.two { top: 13%; right: 6%; animation-delay: 1s; }
+    .sparkle.three { bottom: 14%; right: 3%; animation-delay: 2s; }
+
+    @keyframes twinkle {
+      from { opacity: .25; transform: scale(.7); }
+      to { opacity: 1; transform: scale(1.3); }
+    }
+
+    /* ===== 音樂文字資訊 ===== */
+
+    .music-title {
+      font-size: clamp(29px, 8vw, 39px);
+      font-weight: 800;
+      letter-spacing: 4px;
+      margin-bottom: 8px;
+      color: #686b8e;
+    }
+
+    .music-description {
+      font-size: 16px;
+      letter-spacing: 1.5px;
+      line-height: 1.7;
+      margin-bottom: 18px;
+    }
+
+    .tags {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-bottom: 34px;
+    }
+
+    .tag {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      padding: 9px 17px;
+      border-radius: 25px;
+
+      background: rgba(255,255,255,.37);
+      border: 1px solid rgba(255,255,255,.85);
+
+      box-shadow:
+        inset 0 1px 2px rgba(255,255,255,.8),
+        0 5px 14px rgba(141,132,181,.1);
+    }
+
+    /* ===== 音樂進度條 ===== */
+
+    .progress-container {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 33px;
+    }
+
+    .time {
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .progress {
+      flex: 1;
+      width: 100%;
+      height: 7px;
+      border-radius: 20px;
+      background:
+        linear-gradient(
+          to right,
+          var(--primary) 0%,
+          var(--primary) var(--progress, 0%),
+          rgba(153,151,197,.25) var(--progress, 0%),
+          rgba(153,151,197,.25) 100%
+        );
+    }
+
+    .progress::-webkit-slider-thumb {
+      appearance: none;
+      width: 19px;
+      height: 19px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 3px 10px rgba(105,108,169,.22);
+    }
+
+    .progress::-moz-range-thumb {
+      width: 19px;
+      height: 19px;
+      border: none;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 3px 10px rgba(105,108,169,.22);
+    }
+
+    /* ===== 播放控制 ===== */
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .control-btn {
+      appearance: none;
+      background: none;
+      border: none;
+      color: #898cad;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      padding: 8px;
+      touch-action: manipulation;
+    }
+
+    .control-btn svg {
+      width: 29px;
+      height: 29px;
+      fill: currentColor;
+    }
+
+    .play-btn {
+      width: 92px;
+      height: 92px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      border: 4px solid rgba(255,255,255,.94);
+
+      background:
+        linear-gradient(
+          135deg,
+          #adb1d7,
+          #8f93c3
+        );
+
+      color: white;
+      cursor: pointer;
+
+      display: grid;
+      place-items: center;
+
+      box-shadow:
+        0 8px 22px rgba(115,113,174,.24),
+        inset 0 2px 8px rgba(255,255,255,.2);
+
+      transition: transform .2s;
+    }
+
+    .play-btn:active {
+      transform: scale(.95);
+    }
+
+    .play-btn svg {
+      width: 38px;
+      height: 38px;
+      fill: white;
+    }
+
+    .mute-btn {
+      width: 47px;
+      height: 47px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.4);
+      border: 1px solid rgba(255,255,255,.8);
+      box-shadow: 0 5px 14px rgba(117,111,160,.1);
+    }
+
+    .mute-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* ===== 小螢幕優化 ===== */
+
+    
+/* ===== 小螢幕優化 ===== */
+
+@media (max-width: 360px) {
+
+  .app {
+    padding: 16px 12px 25px;
+  }
+
+  .player {
+    padding: 31px 14px 32px;
+    border-radius: 36px;
+  }
+
+  .cd-area {
+    width: min(68vw, 245px);
+  }
+
+  .music-description {
+    font-size: 14px;
+  }
+
+  .tag {
+    font-size: 12px;
+    padding: 8px 11px;
+  }
+
+  .controls {
+    gap: 3px;
+  }
+
+  .control-btn {
+    padding: 5px;
+  }
+
+  .control-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .play-btn {
+    width: 72px;
+    height: 72px;
+  }
+
+  .play-btn svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .mute-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .mute-btn svg {
+    width: 21px;
+    height: 21px;
+  }
+}
+
+
+
+/* ===== 播放控制 ===== */
+
+.controls {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 96px;
+}
+
+/* 播放鍵維持正中央 */
+
+.play-btn {
+  width: 92px;
+  height: 92px;
+  flex-shrink: 0;
+
+  border-radius: 50%;
+  border: 4px solid rgba(255,255,255,.94);
+
+  background: linear-gradient(
+    135deg,
+    #adb1d7,
+    #8f93c3
+  );
+
+  color: white;
+  cursor: pointer;
+
+  display: grid;
+  place-items: center;
+
+  box-shadow:
+    0 8px 22px rgba(115,113,174,.24),
+    inset 0 2px 8px rgba(255,255,255,.2);
+
+  transition: transform .2s;
+}
+
+/* 靜音按鈕固定在右側 */
+
+.mute-btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 47px;
+  height: 47px;
+
+  border-radius: 50%;
+  background: rgba(255,255,255,.4);
+  border: 1px solid rgba(255,255,255,.8);
+
+  box-shadow: 0 5px 14px rgba(117,111,160,.1);
+}
