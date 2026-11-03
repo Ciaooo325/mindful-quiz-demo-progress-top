@@ -102,8 +102,9 @@ if ("serviceWorker" in navigator) {
     } catch (error) {
       console.error(error);
       status.textContent =
-        "離線資料準備失敗，請確認網路後重新整理。";
+  "離線準備失敗：" + error.name + " — " + error.message;
     }
+    
   });
 }
 </script>
