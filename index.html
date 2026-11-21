@@ -56,6 +56,17 @@
     </section>
   </main>
   <script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", async () => {
+      try {
+        await navigator.serviceWorker.register("./sw.js");
+      } catch (error) {
+        console.error("Service Worker 註冊失敗", error);
+      }
+    });
+  }
+</script>
+  <!-- <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     const status = document.createElement("div");
@@ -107,6 +118,6 @@ if ("serviceWorker" in navigator) {
     
   });
 }
-</script>
+</script> -->
 </body>
 </html>
