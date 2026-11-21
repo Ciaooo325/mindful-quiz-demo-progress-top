@@ -80,5 +80,57 @@
 
 
   </main>
+  <script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", async () => {
+    const status = document.createElement("div");
+    status.textContent = "正在準備離線資料，請保持連線…";
+    status.style.cssText =
+      "position:fixed;bottom:12px;left:12px;right:12px;" +
+      "padding:12px;background:#fff;color:#234;border-radius:10px;" +
+      "box-shadow:0 2px 12px #0003;z-index:99999;text-align:center;";
+    document.body.appendChild(status);
+
+    try {
+      const registration = await navigator.serviceWorker.register("./sw.js");
+
+      if (registration.waiting) {
+        status.textContent = "新版離線資料已備妥，請關閉所有網站視窗後重開。";
+        return;
+      }
+
+      if (registration.installing) {
+        await new Promise((resolve, reject) => {
+          const worker = registration.installing;
+
+          const check = () => {
+            if (worker.state === "installed" ||
+                worker.state === "activated") resolve();
+            if (worker.state === "redundant") {
+              reject(new Error("離線資料下載失敗"));
+            }
+          };
+
+          worker.addEventListener("statechange", check);
+          check();
+        });
+      }
+
+      if (registration.waiting) {
+        status.textContent = "新版離線資料已備妥，請關閉所有網站視窗後重開。";
+        return;
+      }
+
+      await navigator.serviceWorker.ready;
+      status.textContent = "離線資料已準備完成，可以斷網使用。";
+      setTimeout(() => status.remove(), 5000);
+    } catch (error) {
+      console.error(error);
+      status.textContent =
+        "離線資料準備失敗，請確認網路後重新整理。";
+    }
+  });
+}
+</script>
 </body>
 </html>
